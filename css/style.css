@@ -1,0 +1,126 @@
+:root {
+    --primario: #66b6ba;
+    --primarioOscuro: #005f6b;
+    --secundario: #FFCE00;
+    --secundarioOscuro: rgb(233, 187, 2);
+    --blanco: #FFF;
+    --negro: #000;
+    --fuentePrincipal: 'Staatliches', cursive;
+
+    --background: #e0f7fa; /* Azul claro */
+    --headerBackground: #66b6ba; /* Azul primario */
+    --asideBackground: #b2ebf2; /* Azul muy claro */
+    --textColor: #005f6b; /* Azul oscuro para texto */
+}
+
+html {
+    box-sizing: border-box;
+    font-size: 62.5%;
+}
+
+
+
+body {
+    background-color: var(--background);
+    font-size: 1.6rem;
+    line-height: 1.5;
+    margin: 0;
+    padding: 0;
+    color: var(--textColor);
+}
+
+.header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--headerBackground);
+    padding: 1rem 0;
+}
+
+.header__logo {
+    margin: 3rem 0;
+}
+
+.main-container {
+    display: flex;
+    justify-content: center;
+    margin: 2rem;
+}
+
+.content {
+    flex: 1;
+    max-width: 70%;
+    margin: 0 auto;
+    text-align: center;
+    background-color: var(--blanco);
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+aside {
+    margin-left: 1.5rem;
+    margin-right: 1.5rem;
+    background-color: var(--asideBackground);
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.sesion {
+    text-align: center;
+    border: 1px solid var(--textColor);
+    padding: 1rem;
+    border-radius: 8px;
+    background-color: var(--blanco);
+}
+
+form {
+    margin: 1.5em;
+}
+
+input[type="submit"], .botones {
+    background-color: var(--primarioOscuro);
+    color: var(--blanco);
+    border: none;
+    padding: 1.2rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    margin: 0.5rem;
+}
+
+input[type="submit"]:hover, .botones:hover {
+    background-color: var(--primario);
+}
+
+input[type="text"], input[type="number"], select {
+    width: 60%;
+    padding: 1rem;
+    margin: 0.5rem 0;
+    border: 1px solid var(--primarioOscuro);
+    border-radius: 8px;
+    font-size: 1.6rem;
+}
+
+table {
+    background-color:var(--asideBackground);
+    margin: 0 auto; /* Centrar la tabla horizontalmente */
+    border-radius: 4px;
+    color: var(--negro);
+    text-transform: uppercase;
+    border-collapse: collapse; /* Colapsar los bordes de la tabla */
+    width:100%; /* Establecer el ancho de la tabla */
+    font-weight: 700;
+    
+}
+p{
+    margin: 1rem;
+    padding: 1rem;
+    font-weight: 600;
+    background-color: #FFF;
+}
+th, td {
+    padding: 8px; /* Agregar relleno a las celdas */
+    border: 1px solid #dddddd; /* Agregar bordes a las celdas */
+    text-align: left; /* Alinear el texto a la izquierda */
+}

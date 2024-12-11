@@ -1,0 +1,20 @@
+.usuarios {
+display: flex;
+justify-content: center;
+position: relative;
+background-color: bisque;
+margin: 10px;
+}
+
+.titulo{
+text-align: center;
+}
+
+.submit{
+    align-self: center;
+    
+  }
+
+  .botonGuardar{
+    margin:5px;
+  }
