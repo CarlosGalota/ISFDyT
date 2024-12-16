@@ -14,7 +14,7 @@ class PDF extends FPDF
     function Header()
     {
         $conexion = conectar();
-        $consulta_info = $conexion->query("SELECT * FROM usuarios, notas, carreras WHERE usuarios.id_usuario=" . $_SESSION['id_usuario'] . " AND notas.id_alumno=" . $_SESSION['id_usuario'] . " AND carreras.id_carrera=" . $_SESSION['carrera_id'] . ";");
+        $consulta_info = $conexion->query("SELECT * FROM usuarios, notas, carreras WHERE usuarios.idUsuarios=" . $_SESSION['id_usuario'] . " AND notas.idUsuarios=" . $_SESSION['id_usuario'] . " AND carreras.idCarreras=" . $_SESSION['carrera_id'] . ";");
         $dato_info = $consulta_info->fetch_object();
 
         if (!$dato_info) {
@@ -27,14 +27,14 @@ class PDF extends FPDF
         $this->SetTextColor(0, 0, 0); // color
 
         // Celda de título
-        $this->Cell(110, 15, mb_convert_encoding($dato_info->nombre_carrera, 'ISO-8859-1', 'UTF-8'), 1, 1, 'C', 0);
+        $this->Cell(110, 15, mb_convert_encoding($dato_info->nombreCarreras, 'ISO-8859-1', 'UTF-8'), 1, 1, 'C', 0);
         $this->Ln(3); // Salto de línea
 
         // Datos del estudiante
         $this->SetTextColor(103);
         $this->SetFont('Arial', 'B', 10);
         $this->Cell(180);
-        $this->Cell(96, 10, mb_convert_encoding("Matricula: " . $dato_info->id_usuario, 'ISO-8859-1', 'UTF-8'), 0, 1, '', 0);
+        $this->Cell(96, 10, mb_convert_encoding("Matricula: " . $dato_info->idUsuarios, 'ISO-8859-1', 'UTF-8'), 0, 1, '', 0);
         $this->Cell(180);
         $this->Cell(96, 10, mb_convert_encoding("Nombre: " . $dato_info->nombre, 'ISO-8859-1', 'UTF-8'), 0, 1, '', 0);
         $this->Cell(180);
@@ -84,7 +84,7 @@ $pdf->AliasNbPages();
 $pdf->SetFont('Arial', '', 12);
 $pdf->SetDrawColor(163, 163, 163);
 
-$consulta_reporte = $conexion->query("SELECT * FROM usuarios, notas, materias WHERE usuarios.id_usuario=" . $_SESSION['id_usuario'] . " AND notas.id_alumno=" . $_SESSION['id_usuario'] . " AND materias.id_materia=notas.id_materia;");
+$consulta_reporte = $conexion->query("SELECT * FROM usuarios, notas, materias WHERE usuarios.idUsuarios=" . $_SESSION['id_usuario'] . " AND notas.idUsuarios=" . $_SESSION['id_usuario'] . " AND materias.idMaterias=notas.idMaterias;");
 
 if (!$consulta_reporte) {
     die('Error en la consulta: ' . $conexion->error);
@@ -93,13 +93,21 @@ if (!$consulta_reporte) {
 $i = 0;
 while ($datos_reporte = $consulta_reporte->fetch_object()) {
     $i++;
+    $nombre = $datos_reporte->nombre ?? ''; // Asigna '' si es null
+    $apellido = $datos_reporte->apellido ?? ''; // Asigna '' si es null
+    $nombreMaterias = $datos_reporte->nombreMaterias ?? ''; // Asigna '' si es null
+    $parcial1 = $datos_reporte->parcial1 ?? ''; // Asigna '' si es null
+    $parcial2 = $datos_reporte->parcial2 ?? ''; // Asigna '' si es null
+    $final = $datos_reporte->final ?? ''; // Asigna '' si es null
+
+    // Asegúrate de que mb_convert_encoding no reciba valores null
     $pdf->Cell(30, 10, mb_convert_encoding($i, 'ISO-8859-1', 'UTF-8'), 1, 0, 'C', 0);
-    $pdf->Cell(40, 10, mb_convert_encoding($datos_reporte->nombre, 'ISO-8859-1', 'UTF-8'), 1, 0, 'C', 0);
-    $pdf->Cell(40, 10, mb_convert_encoding($datos_reporte->apellido, 'ISO-8859-1', 'UTF-8'), 1, 0, 'C', 0);
-    $pdf->Cell(70, 10, mb_convert_encoding($datos_reporte->nombre_materia, 'ISO-8859-1', 'UTF-8'), 1, 0, 'C', 0);
-    $pdf->Cell(30, 10, mb_convert_encoding($datos_reporte->parcial1, 'ISO-8859-1', 'UTF-8'), 1, 0, 'C', 0);
-    $pdf->Cell(30, 10, mb_convert_encoding($datos_reporte->parcial2, 'ISO-8859-1', 'UTF-8'), 1, 0, 'C', 0);
-    $pdf->Cell(30, 10, mb_convert_encoding($datos_reporte->final, 'ISO-8859-1', 'UTF-8'), 1, 1, 'C', 0);
+    $pdf->Cell(40, 10, mb_convert_encoding($nombre, 'ISO-8859-1', 'UTF-8'), 1, 0, 'C', 0);
+    $pdf->Cell(40, 10, mb_convert_encoding($apellido, 'ISO-8859-1', 'UTF-8'), 1, 0, 'C', 0);
+    $pdf->Cell(70, 10, mb_convert_encoding($nombreMaterias, 'ISO-8859-1', 'UTF-8'), 1, 0, 'C', 0);
+    $pdf->Cell(30, 10, mb_convert_encoding($parcial1, 'ISO-8859-1', 'UTF-8'), 1, 0, 'C', 0);
+    $pdf->Cell(30, 10, mb_convert_encoding($parcial2, 'ISO-8859-1', 'UTF-8'), 1, 0, 'C', 0);
+    $pdf->Cell(30, 10, mb_convert_encoding($final, 'ISO-8859-1', 'UTF-8'), 1, 1, 'C', 0);
 }
 
 $pdf->Output('I', 'Calificaciones.pdf');

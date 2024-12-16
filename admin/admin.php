@@ -4,7 +4,7 @@ require "conexion.php";
 
 // Consultar las carreras
 $conn = conectar();
-$carreras_sql = "SELECT idCarreras, nombreCarreras FROM carreras";
+$carreras_sql = "SELECT * FROM carreras";
 $carreras_result = mysqli_query($conn, $carreras_sql);
 
 // Consultar las materias
@@ -101,9 +101,9 @@ while ($materia = mysqli_fetch_assoc($materias_result)) {
                 <td>Rol</td>
                 <td>
                     <select id="rol" name="rol" onchange="toggleMateriaCarrera()" required>
-                        <option value="3">Preceptor</option>
-                        <option value="2">Profesor</option>
-                        <option value="1">Alumno</option>
+                        <option value="2">Preceptor</option>
+                        <option value="1">Profesor</option>
+                        <option value="3">Alumno</option>
                     </select>
                 </td>
             </tr>

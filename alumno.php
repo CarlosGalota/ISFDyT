@@ -1,4 +1,6 @@
 <?php
+
+
 session_start();
 if(isset($_SESSION['id_usuario'])&& $_SESSION['rol']==3){
 
@@ -21,4 +23,6 @@ else{
     </form>
 	</div>
 
-    <?php include ("include/footer.php") ?>
+    <?php 
+    
+    include ("include/footer.php") ?>

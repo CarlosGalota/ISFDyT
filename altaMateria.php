@@ -3,12 +3,36 @@ session_start();
 if (!isset($_SESSION['id_usuario']) || $_SESSION['rol'] != 3) {
     echo "ACCESO NO AUTORIZADO";
     exit();
+    
 }
 
 require "conexion.php";
 ?>
 
-<?php include("include/header.php") ?>
+<?php include("include/header.php");
+
+$mysqli = conectar();
+// Obtener carrera
+$sql_carrera = "SELECT * FROM usuarios_carreras WHERE idUsuarios = ?";
+$stmt = $mysqli->prepare($sql_carrera);
+if (!$stmt) {
+    die("Error en la preparación de la consulta: " . $mysqli->error);
+}
+
+$stmt->bind_param('i', $_SESSION['id_usuario']); 
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($result->num_rows > 0) {
+    $carrera = $result->fetch_assoc();
+    $_SESSION['carrera_id'] = $carrera['idCarreras'];
+} else {
+    $_SESSION['carrera_id'] = null; // No se encontró carrera asociada
+}
+
+
+
+?>
 
 <!DOCTYPE html>
 <html lang="es">
@@ -30,25 +54,27 @@ require "conexion.php";
 </head>
 <body>
     <div class="content">
+        
         <h1>Inscribirse a materia</h1>
         <h3>Alta Materia</h3>
         <form method="post">
             <select name="materias">
             <?php 
+                
                 $conn = conectar();
-                $sql = "SELECT * FROM materias WHERE id_carrera = " . $_SESSION['carrera_id'];
+                $sql = "SELECT * FROM Materias WHERE idCarreras = ".$_SESSION['carrera_id'];
                 $result = $conn->query($sql);
 
                 if ($result->num_rows > 0) {
                     while ($row = $result->fetch_assoc()) {
             ?>
-                    <option value="<?= htmlspecialchars($row['id_materia']); ?>"><?= htmlspecialchars($row['nombre_materia']); ?></option>
+                    <option value="<?= htmlspecialchars($row['idMaterias']); ?>"><?= htmlspecialchars($row['nombreMaterias']); ?></option>
             <?php
                     }
                 } else {
                     echo "<option value=''>No hay materias disponibles</option>";
                 }
-                $conn->close();
+                
             ?>
             </select>
             <button type="submit" class="botones">Submit</button>
@@ -61,21 +87,22 @@ require "conexion.php";
                 <th>Acción</th>
             </tr>
             <?php 
+           
                 $id_alumno = $_SESSION['id_usuario'];
-                $sql = "SELECT materias.nombre_materia, materias.id_materia
-                        FROM alumnos_materias 
-                        INNER JOIN materias ON alumnos_materias.id_materia = materias.id_materia
-                        WHERE alumnos_materias.id_alumno = $id_alumno";
+                $sql = "SELECT materias.nombreMaterias, materias.idMaterias
+                        FROM  notas
+                        INNER JOIN materias ON notas.idMaterias = materias.idMaterias
+                        WHERE notas.idUsuarios = $id_alumno";
                 $result = $conn->query($sql);
 
                 if ($result->num_rows > 0) {
                     while ($row = $result->fetch_assoc()) {
             ?>
                         <tr>
-                            <td><?= htmlspecialchars($row['nombre_materia']); ?></td>
+                            <td><?= htmlspecialchars($row['nombreMaterias']); ?></td>
                             <td>
                                 <form method="post">
-                                    <input type="hidden" name="baja_materia" value="<?= htmlspecialchars($row['id_materia']); ?>">
+                                    <input type="hidden" name="baja_materia" value="<?= htmlspecialchars($row['idMaterias']); ?>">
                                     <input type="submit" value="Darse de Baja" class="botones">
                                 </form>
                             </td>
@@ -100,13 +127,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (isset($_POST['materias'])) {
         $conn = conectar();
         $id_materia = $_POST['materias'];
-        $id_alumno = $_SESSION['id_usuario'];
-        $sql_check = "SELECT * FROM alumnos_materias WHERE id_alumno = $id_alumno AND id_materia = $id_materia";
+        $id_usuario = $_SESSION['id_usuario'];
+        $sql_check = "SELECT * FROM notas WHERE idUsuarios = $id_usuario AND idMaterias = $id_materia";
         $result_check = $conn->query($sql_check);
         
         if ($result_check->num_rows == 0) {
             
-            $sql_insert = "INSERT INTO alumnos_materias (id_alumno, id_materia) VALUES ($id_alumno, $id_materia)";
+            $sql_insert = "INSERT INTO notas (idUsuarios, idMaterias) VALUES ($id_alumno, $id_materia)";
             
             if ($conn->query($sql_insert) === TRUE) {
                 echo "Materia registrada correctamente";
@@ -125,7 +152,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         // Eliminar la materia seleccionada de la tabla alumnos_materias
         $conn = conectar();
-        $sql = "DELETE FROM alumnos_materias WHERE id_alumno = $id_alumno AND id_materia = $id_materia_baja";
+        $sql = "DELETE FROM notas WHERE idUsuarios = $id_alumno AND idMaterias = $id_materia_baja";
         
         if ($conn->query($sql) === TRUE) {
             echo "Te has dado de baja de la materia correctamente";

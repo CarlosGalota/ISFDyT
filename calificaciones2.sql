@@ -15,7 +15,8 @@ CREATE TABLE IF NOT EXISTS `Roles` (
 ) ENGINE=InnoDB;
 
 -- Insertar Roles
-INSERT INTO `Roles` (`nombreRol`) VALUES ('alumno'), ('profesor'), ('preceptor');
+INSERT INTO `Roles` VALUES (1,'Profesor'), (2,'preceptor'), (3,'alumno');
+
 
 -- -----------------------------------------------------
 -- Tabla Usuarios

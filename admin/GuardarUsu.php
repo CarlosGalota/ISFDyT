@@ -18,15 +18,17 @@ if (mysqli_query($conn, $sql)) {
     $usuario_id = mysqli_insert_id($conn);
     
     // Si el rol es Profesor, insertar en la tabla materias_usuarios
-    if ($rol == 2 && $materia) {
-        $sql_materia = "INSERT INTO Materias_Profesores (idProfesor, idMaterias) VALUES ('$usuario_id', '$materia')";
+    if ($rol == 1 && $materia) {
+        $sql_materia = "INSERT INTO Materias_Profesores (idUsuarios, idMaterias) VALUES ('$usuario_id', '$materia')";
         mysqli_query($conn, $sql_materia);
+    } else{
+        
+            $sql_carrera = "INSERT INTO Usuarios_Carreras (idUsuarios, idCarreras) VALUES ('$usuario_id', '$carrera')";
+            mysqli_query($conn, $sql_carrera);
+        
+    
     }
-    if ($rol == 1 && $carrera) {
-        $sql_carrera = "INSERT INTO Usuarios_Carreras (idUsuarios, idCarreras) VALUES ('$usuario_id', '$carrera')";
-        mysqli_query($conn, $sql_carrera);
-    }
-
+    
     header("Location: admin.php?ok");
 } else {
     header("Location: admin.php?error");

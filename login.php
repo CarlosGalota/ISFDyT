@@ -7,15 +7,15 @@ if(isset($_SESSION['id_usuario'])) {
     switch ($_SESSION['rol']) {
         case 1:
             // Profesor
-            header("Location: alumno.php");
+            header("Location: profesor.php");
             exit();
         case 2:
             // Preceptor
-            header("Location: profesor.php");
+            header("Location: preceptor.php");
             exit();
         case 3:
             // Alumno
-            header("Location: Preceptor.php");
+            header("Location: alumno.php");
             exit();
         default:
             // Rol no válido
@@ -30,28 +30,31 @@ require "conexion.php";
 $mysqli = conectar();
 
 // Obtener datos del formulario y sanitizar la entrada del usuario
-$email = $mysqli->real_escape_string($_POST['email']);
+$usuario = $mysqli->real_escape_string($_POST['usuario']);
 $pass = $mysqli->real_escape_string($_POST['pass']);
 
 // Validar usuario utilizando sentencia preparada
-$query = "SELECT * FROM usuarios WHERE email = ? AND pass = ?";
+$query = "SELECT * FROM usuarios WHERE usuario = ? AND password = ?";
 $stmt = $mysqli->prepare($query);
-$stmt->bind_param("ss", $email, $pass);
+$stmt->bind_param("ss", $usuario, $pass);
 $stmt->execute();
 $result = $stmt->get_result();
+
+
 
 if ($result->num_rows === 1) {
     // Usuario encontrado
     $user = $result->fetch_assoc();
-    $_SESSION['id_usuario'] = $user['id_usuario'];
+    $_SESSION['id_usuario'] = $user['idUsuarios'];
     $_SESSION['nombre'] = $user['nombre'];
     $_SESSION['dni'] = $user['dni'];
     $_SESSION['apellido'] = $user['apellido'];
-    $_SESSION['carrera_id'] = $user['id_carrera'];
-    $_SESSION['rol'] = $user['rol'];
+    $_SESSION['rol'] = $user['idRoles'];
+
+    
 
     // Redirigir según el rol
-    switch ($user['rol']) {
+    switch ($user['idRoles']) {
         case 1:
             // Profesor
             header("Location: profesor.php");
