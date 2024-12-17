@@ -20,27 +20,59 @@ function redirigirConMensaje($mensaje, $rol) {
     exit();
 }
 
-if ($_SESSION['rol'] == 1) {
-    $sql = "SELECT * FROM usuarios 
-            JOIN notas ON usuarios.id_usuario = notas.id_alumno 
-            WHERE usuarios.apellido = ? AND usuarios.id_carrera = ? AND notas.id_profesor = ?";
+
+if ($_SESSION['rol'] == 1) { // Rol: Profesores
+    $sql = "SELECT 
+                *
+            FROM 
+                usuarios AS u
+            INNER JOIN 
+                notas AS n ON u.idUsuarios = n.idUsuarios
+            INNER JOIN 
+                materias_profesores AS mp ON n.idMaterias = mp.idMaterias
+            WHERE 
+                u.apellido = ? 
+                AND mp.idUsuarios = ?";
+
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("si", $apellido, $_SESSION['id_usuario']);
+
+} else if ($_SESSION['rol'] == 2) { // Rol: Preceptores
+    $sql = "SELECT 
+                u.idUsuarios, 
+                u.nombre, 
+                u.apellido, 
+                n.idMaterias, 
+                n.parcial1, 
+                n.parcial2, 
+                n.final
+            FROM 
+                usuarios AS u
+            INNER JOIN 
+                notas AS n ON u.idUsuarios = n.idUsuarios
+            INNER JOIN 
+                materias_profesores AS mp ON n.idMaterias = mp.idMaterias
+            INNER JOIN 
+                materias AS m ON n.idMaterias = m.idMaterias
+            WHERE 
+                u.apellido = ? 
+                AND m.idCarreras = ? 
+                AND mp.idUsuarios = ?";
+
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("sii", $apellido, $_SESSION['carrera_id'], $_SESSION['id_usuario']);
-} else if ($_SESSION['rol'] == 2) {
-    $sql = "SELECT * FROM usuarios 
-            JOIN notas ON usuarios.id_usuario = notas.id_alumno 
-            WHERE usuarios.apellido = ? AND usuarios.id_carrera = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("si", $apellido, $_SESSION['carrera_id']);
 }
 
 $stmt->execute();
 $result = $stmt->get_result();
 
+// Si no hay resultados
 if ($result->num_rows == 0) {
     redirigirConMensaje("No se encontró el alumno.", $_SESSION['rol']);
+    exit();
 }
 
+// Construir el array de alumnos
 $alumnos = [];
 while ($registro = $result->fetch_assoc()) {
     $alumnos[] = $registro;
@@ -83,21 +115,21 @@ while ($registro = $result->fetch_assoc()) {
                         <td><?= htmlspecialchars($alumno['dni']) ?></td>
                         <td>
                             <?php
-                            $matnom = "SELECT nombre_materia FROM materias WHERE id_materia = ?";
+                            $matnom = "SELECT nombreMaterias FROM materias WHERE idMaterias = ?";
                             $stmtMat = $conn->prepare($matnom);
-                            $stmtMat->bind_param("i", $alumno['id_materia']);
+                            $stmtMat->bind_param("i", $alumno['idMaterias']);
                             $stmtMat->execute();
                             $resmat = $stmtMat->get_result()->fetch_assoc();
-                            echo htmlspecialchars($resmat['nombre_materia']);
+                            echo htmlspecialchars($resmat['nombreMaterias']);
                             ?>
                         </td>
-                        <td><?= htmlspecialchars($alumno['parcial1']) ?></td>
-                        <td><?= htmlspecialchars($alumno['parcial2']) ?></td>
-                        <td><?= htmlspecialchars($alumno['final']) ?></td>
+                        <td><?= $alumno['parcial1'] !== null ? htmlspecialchars($alumno['parcial1']) : "No disponible" ?></td>
+                        <td><?= $alumno['parcial2'] !== null ? htmlspecialchars($alumno['parcial2']) : "No disponible" ?></td>
+                        <td><?= $alumno['final'] !== null ? htmlspecialchars($alumno['final']) : "No disponible" ?></td>
                         <?php if ($_SESSION['rol'] == 1): ?>
                             <td>
-                                <input type="radio" name="idAlumno" value="<?= htmlspecialchars($alumno['id_alumno']) ?>" required>
-                                <input type="hidden" name="idMateria" value="<?= htmlspecialchars($alumno['id_materia']) ?>">
+                                <input type="radio" name="idAlumno" value="<?= htmlspecialchars($alumno['idUsuarios']) ?>" required>
+                                <input type="hidden" name="idMateria" value="<?= htmlspecialchars($alumno['idMaterias']) ?>">
                             </td>
                         <?php endif; ?>
                     </tr>

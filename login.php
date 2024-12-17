@@ -51,6 +51,26 @@ if ($result->num_rows === 1) {
     $_SESSION['apellido'] = $user['apellido'];
     $_SESSION['rol'] = $user['idRoles'];
 
+    $mysqli = conectar();
+    // Obtener carrera
+    $sql_carrera = "SELECT * FROM usuarios_carreras WHERE idUsuarios = ?";
+    $stmt = $mysqli->prepare($sql_carrera);
+    if (!$stmt) {
+        die("Error en la preparación de la consulta: " . $mysqli->error);
+    }
+    
+    $stmt->bind_param('i', $_SESSION['id_usuario']); 
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    if ($result->num_rows > 0) {
+        $carrera = $result->fetch_assoc();
+        $_SESSION['carrera_id'] = $carrera['idCarreras'];
+    } else {
+        $_SESSION['carrera_id'] = null; // No se encontró carrera asociada
+    }
+    
+
     
 
     // Redirigir según el rol
