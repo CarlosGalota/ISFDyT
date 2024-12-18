@@ -40,22 +40,18 @@ if ($_SESSION['rol'] == 1) { // Rol: Profesores
 
 } else if ($_SESSION['rol'] == 2) { // Rol: Preceptores
     $sql = "SELECT 
-               *
-            FROM 
-                usuarios AS u
-            INNER JOIN 
-                notas AS n ON u.idUsuarios = n.idUsuarios
-            INNER JOIN 
-                materias_profesores AS mp ON n.idMaterias = mp.idMaterias
-            INNER JOIN 
-                materias AS m ON n.idMaterias = m.idMaterias
-            WHERE 
-                u.apellido = ? 
-                AND m.idCarreras = ? 
-                AND mp.idUsuarios = ?";
+            *
+        FROM 
+            usuarios AS u
+        INNER JOIN 
+            notas AS n ON u.idUsuarios = n.idUsuarios
+        INNER JOIN 
+            usuarios_carreras AS uc ON uc.idUsuarios = ".$_SESSION['id_usuario']."
+        WHERE 
+            u.apellido = ? ";
 
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("sii", $apellido, $_SESSION['carrera_id'], $_SESSION['id_usuario']);
+    $stmt->bind_param("s", $apellido);
 }
 
 $stmt->execute();

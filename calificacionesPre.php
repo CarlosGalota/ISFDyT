@@ -30,13 +30,11 @@ if (!isset($_SESSION['id_usuario']) || $_SESSION['rol'] != 2) {
 require "conexion.php";
 
 
-$sql = "SELECT * FROM usuarios JOIN notas ON notas.id_alumno = usuarios.id_usuario
-        WHERE usuarios.rol = 3 AND usuarios.id_carrera = ?";
+$sql 
 
 $conn = conectar();
 
 if ($stmt = $conn->prepare($sql)) {
-  $stmt->bind_param("i", $_SESSION['carrera_id']); // Enlaza la variable de sesión como un entero
   $stmt->execute();
   $result = $stmt->get_result();
   if(mysqli_affected_rows($conn) > 0){
@@ -49,13 +47,13 @@ if ($stmt = $conn->prepare($sql)) {
         <td><?php echo $registro['apellido']?></td>
         <td><?php echo $registro['dni']?></td>
         <td><?php  
-                $matnom="select nombre_materia from materias where id_materia=".$registro['id_materia']. ";";
+                $matnom="select nombreMaterias from materias where idMaterias=".$registro['idMaterias']. ";";
     
                 $conmat=mysqli_query($conn,$matnom);
                 
                 $resmat=mysqli_fetch_assoc($conmat);
         
-        echo $resmat['nombre_materia']?></td>
+        echo $resmat['nombreMaterias']?></td>
         <td><?php echo $registro['parcial1']?></td>
         <td><?php echo $registro['parcial2']?></td>
         <td><?php echo $registro['final']?></td>
