@@ -30,7 +30,17 @@ if (!isset($_SESSION['id_usuario']) || $_SESSION['rol'] != 2) {
 require "conexion.php";
 
 
-$sql 
+$sql = "SELECT 
+            *
+        FROM 
+            usuarios AS u
+        INNER JOIN 
+            notas AS n ON u.idUsuarios = n.idUsuarios
+        INNER JOIN 
+            usuarios_carreras AS uc ON uc.idUsuarios = ".$_SESSION['id_usuario']."
+        WHERE 
+            u.idRoles = 3;
+        ";
 
 $conn = conectar();
 
