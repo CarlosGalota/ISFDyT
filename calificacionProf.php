@@ -41,9 +41,9 @@ $errorMessage = '';
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['guardar'])) {
   $materia = $_POST['materia'];
   
-  $stmtCheck = $conn->prepare("SELECT id_nota FROM notas WHERE id_alumno = ? AND id_materia = ? AND id_profesor = ?");
-  $stmtInsert = $conn->prepare("INSERT INTO notas (id_profesor, id_alumno, parcial1, parcial2, id_materia) VALUES (?, ?, ?, ?, ?)");
-  $stmtUpdate = $conn->prepare("UPDATE notas SET parcial1 = ?, parcial2 = ? WHERE id_alumno = ? AND id_materia = ? AND id_profesor = ?");
+  $stmtCheck = $conn->prepare("SELECT idNotas FROM notas WHERE idUsuarios= ? AND idMaterias = ?");
+  $stmtInsert = $conn->prepare("INSERT INTO notas (idUsuarios, parcial1, parcial2, idMaterias) VALUES (?, ?, ?, ?)");
+  $stmtUpdate = $conn->prepare("UPDATE notas SET parcial1 = ?, parcial2 = ? WHERE idUsuarios = ? AND idMaterias = ?");
   
   $valid = true;
   foreach ($_POST['notas'] as $idAlumno => $notas) {
@@ -59,17 +59,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['guardar'])) {
 
       if ($valid) {
           // Verificar si la nota ya existe
-          $stmtCheck->bind_param("iii", $idAlumno, $materia, $idProfesor);
+          $stmtCheck->bind_param("ii", $idAlumno, $materia);
           $stmtCheck->execute();
           $stmtCheck->store_result();
 
           if ($stmtCheck->num_rows > 0) {
               // Actualizar si ya existe
-              $stmtUpdate->bind_param("iiiii", $parcial1, $parcial2, $idAlumno, $materia, $idProfesor);
+              $stmtUpdate->bind_param("iiii", $parcial1, $parcial2, $idAlumno, $materia);
               $stmtUpdate->execute();
           } else {
               // Insertar si no existe
-              $stmtInsert->bind_param("iiiii", $idProfesor, $idAlumno, $parcial1, $parcial2, $materia);
+              $stmtInsert->bind_param("iiii", $idAlumno, $parcial1, $parcial2, $materia);
               $stmtInsert->execute();
           }
       }
@@ -84,7 +84,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['guardar'])) {
 
 // Función para obtener la nota de un alumno en una materia específica
 function obtenerNota($conn, $idAlumno, $idMateria, $tipoParcial) {
-  $sqlNota = "SELECT $tipoParcial FROM notas WHERE id_alumno = ? AND id_materia = ?";
+  $sqlNota = "SELECT $tipoParcial FROM notas WHERE idUsuarios = ? AND idMaterias = ?";
   $stmtNota = $conn->prepare($sqlNota);
   $stmtNota->bind_param("ii", $idAlumno, $idMateria);
   $stmtNota->execute();

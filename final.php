@@ -12,10 +12,10 @@ $conn = conectar();
 $idProfesor = $_SESSION['id_usuario'];
 
 // Obtener la lista de materias del profesor
-$sqlMaterias = "SELECT m.id_materia, m.nombre_materia 
-                FROM profesores_materias pm
-                JOIN materias m ON pm.id_materia = m.id_materia
-                WHERE pm.id_profesor = ?";
+$sqlMaterias = "SELECT m.idMaterias, m.nombreMaterias
+                FROM materias_profesores pm
+                JOIN materias m ON pm.idMaterias = m.idMaterias
+                WHERE pm.idUsuarios = ?";
 $stmtMaterias = $conn->prepare($sqlMaterias);
 $stmtMaterias->bind_param("i", $idProfesor);
 $stmtMaterias->execute();
@@ -27,7 +27,7 @@ $errorMessage = '';
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['guardar'])) {
     $materia = $_POST['materia'];
     
-    $stmtUpdate = $conn->prepare("UPDATE notas SET final = ? WHERE id_alumno = ? AND id_materia = ? AND id_profesor = ?");
+    $stmtUpdate = $conn->prepare("UPDATE notas SET final = ? WHERE idUsuarios = ? AND idMaterias = ?");
 
     $valid = true;
     foreach ($_POST['notas'] as $idAlumno => $notas) {
@@ -41,7 +41,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['guardar'])) {
         }
 
         if ($valid && $final !== null) {
-            $stmtUpdate->bind_param("iiii", $final, $idAlumno, $materia, $idProfesor);
+            $stmtUpdate->bind_param("iii", $final, $idAlumno, $materia);
             $stmtUpdate->execute();
         }
     }
@@ -55,7 +55,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['guardar'])) {
 
 // Función para obtener la nota de un alumno en una materia específica
 function obtenerNota($conn, $idAlumno, $idMateria, $tipoParcial) {
-    $sqlNota = "SELECT $tipoParcial FROM notas WHERE id_alumno = ? AND id_materia = ?";
+    $sqlNota = "SELECT $tipoParcial FROM notas WHERE idUsuarios = ? AND idMaterias = ?";
     $stmtNota = $conn->prepare($sqlNota);
     $stmtNota->bind_param("ii", $idAlumno, $idMateria);
     $stmtNota->execute();
@@ -104,8 +104,8 @@ include("include/header.php");
     <label for="materia">Seleccione la materia:</label>
     <select name="materia" id="materia">
         <?php while ($rowMateria = $resultMaterias->fetch_assoc()): ?>
-            <option value="<?= htmlspecialchars($rowMateria['id_materia']) ?>">
-                <?= htmlspecialchars($rowMateria['nombre_materia']) ?>
+            <option value="<?= htmlspecialchars($rowMateria['idMaterias']) ?>">
+                <?= htmlspecialchars($rowMateria['nombreMaterias']) ?>
             </option>
         <?php endwhile; ?>
     </select>
@@ -116,10 +116,10 @@ include("include/header.php");
 // Si se ha seleccionado una materia, mostrar la lista de alumnos
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['seleccionar_materia'])) {
     $materiaSeleccionada = $_POST['materia'];
-    $sqlAlumnos = "SELECT u.id_usuario as id_alumno, u.nombre, u.apellido, u.dni 
+    $sqlAlumnos = "SELECT u.idUsuarios, u.nombre, u.apellido, u.dni 
                    FROM usuarios u
-                   INNER JOIN alumnos_materias am ON u.id_usuario = am.id_alumno 
-                   WHERE am.id_materia = ?";
+                   INNER JOIN notas n ON u.idUsuarios = n.idUsuarios 
+                   WHERE n.idMaterias = ?";
     $stmtAlumnos = $conn->prepare($sqlAlumnos);
     $stmtAlumnos->bind_param("i", $materiaSeleccionada);
     $stmtAlumnos->execute();
@@ -143,15 +143,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['seleccionar_materia'])
                         <td><?= htmlspecialchars($rowAlumno['nombre']) ?></td>
                         <td><?= htmlspecialchars($rowAlumno['apellido']) ?></td>
                         <td><?= htmlspecialchars($rowAlumno['dni']) ?></td>
-                        <td><?= obtenerNota($conn, $rowAlumno['id_alumno'], $materiaSeleccionada, 'parcial1') ?></td>
-                        <td><?= obtenerNota($conn, $rowAlumno['id_alumno'], $materiaSeleccionada, 'parcial2') ?></td>
+                        <td><?= obtenerNota($conn, $rowAlumno['idUsuarios'], $materiaSeleccionada, 'parcial1') ?></td>
+                        <td><?= obtenerNota($conn, $rowAlumno['idUsuarios'], $materiaSeleccionada, 'parcial2') ?></td>
                         <?php
-                        $nota_parcial1 = obtenerNota($conn, $rowAlumno['id_alumno'], $materiaSeleccionada, 'parcial1');
-                        $nota_parcial2 = obtenerNota($conn, $rowAlumno['id_alumno'], $materiaSeleccionada, 'parcial2');
+                        $nota_parcial1 = obtenerNota($conn, $rowAlumno['idUsuarios'], $materiaSeleccionada, 'parcial1');
+                        $nota_parcial2 = obtenerNota($conn, $rowAlumno['idUsuarios'], $materiaSeleccionada, 'parcial2');
                         if ($nota_parcial1 >= 4 && $nota_parcial2 >= 4) {
                             ?>
-                            <td><input type="number" name="notas[<?= $rowAlumno['id_alumno'] ?>][nota3]"
-                                       value="<?= obtenerNota($conn, $rowAlumno['id_alumno'], $materiaSeleccionada, 'final') ?>" min="0" max="10"></td>
+                            <td><input type="number" name="notas[<?= $rowAlumno['idUsuarios'] ?>][nota3]"
+                                       value="<?= obtenerNota($conn, $rowAlumno['idUsuarios'], $materiaSeleccionada, 'final') ?>" min="0" max="10"></td>
                             <?php
                         } else {
                             echo "<td>Los parciales no están aprobados</td>";
