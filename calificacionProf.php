@@ -26,10 +26,10 @@ $conn = conectar();
 $idProfesor = $_SESSION['id_usuario'];
 
 // Obtener la lista de materias del profesor
-$sqlMaterias = "SELECT m.id_materia, m.nombre_materia 
-              FROM profesores_materias pm
-              JOIN materias m ON pm.id_materia = m.id_materia
-              WHERE pm.id_profesor = ?";
+$sqlMaterias = "SELECT *
+              FROM materias_profesores pm
+              JOIN materias m ON pm.idMaterias = m.idMaterias
+              WHERE pm.idUsuarios = ?";
 $stmtMaterias = $conn->prepare($sqlMaterias);
 $stmtMaterias->bind_param("i", $idProfesor);
 $stmtMaterias->execute();
@@ -126,8 +126,8 @@ function obtenerNota($conn, $idAlumno, $idMateria, $tipoParcial) {
   <label for="materia">Seleccione la materia:</label>
   <select name="materia" id="materia">
       <?php while ($rowMateria = $resultMaterias->fetch_assoc()): ?>
-          <option value="<?= htmlspecialchars($rowMateria['id_materia']) ?>">
-              <?= htmlspecialchars($rowMateria['nombre_materia']) ?>
+          <option value="<?= $rowMateria['idMaterias'] ?>">
+              <?=  $rowMateria['nombreMaterias'] ?>
           </option>
       <?php endwhile; ?>
   </select>
@@ -138,10 +138,10 @@ function obtenerNota($conn, $idAlumno, $idMateria, $tipoParcial) {
 // Si se ha seleccionado una materia, mostrar la lista de alumnos
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['seleccionar_materia'])) {
   $materiaSeleccionada = $_POST['materia'];
-  $sqlAlumnos = "SELECT u.id_usuario as id_alumno, u.nombre, u.apellido, u.dni 
+  $sqlAlumnos = "SELECT u.idUsuarios, u.nombre, u.apellido, u.dni 
                  FROM usuarios u
-                 INNER JOIN alumnos_materias am ON u.id_usuario = am.id_alumno 
-                 WHERE am.id_materia = ?";
+                 INNER JOIN notas am ON u.idUsuarios = am.idUsuarios 
+                 WHERE am.idMaterias = ?";
   $stmtAlumnos = $conn->prepare($sqlAlumnos);
   $stmtAlumnos->bind_param("i", $materiaSeleccionada);
   $stmtAlumnos->execute();
@@ -165,12 +165,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['seleccionar_materia'])
                       <td><?= htmlspecialchars($rowAlumno['apellido']) ?></td>
                       <td><?= htmlspecialchars($rowAlumno['dni']) ?></td>
                       <td>
-                          <input type="number" name="notas[<?= $rowAlumno['id_alumno'] ?>][nota1]" 
-                                 value="<?= obtenerNota($conn, $rowAlumno['id_alumno'], $materiaSeleccionada, 'parcial1') ?>" min="0" max="10">
+                          <input type="number" name="notas[<?= $rowAlumno['idUsuarios'] ?>][nota1]" 
+                                 value="<?= obtenerNota($conn, $rowAlumno['idUsuarios'], $materiaSeleccionada, 'parcial1') ?>" min="0" max="10">
                       </td>
                       <td>
-                          <input type="number" name="notas[<?= $rowAlumno['id_alumno'] ?>][nota2]" 
-                                 value="<?= obtenerNota($conn, $rowAlumno['id_alumno'], $materiaSeleccionada, 'parcial2') ?>" min="0" max="10">
+                          <input type="number" name="notas[<?= $rowAlumno['idUsuarios'] ?>][nota2]" 
+                                 value="<?= obtenerNota($conn, $rowAlumno['idUsuarios'], $materiaSeleccionada, 'parcial2') ?>" min="0" max="10">
                       </td>
                   </tr>
               <?php endwhile; ?>

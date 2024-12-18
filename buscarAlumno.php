@@ -23,29 +23,24 @@ function redirigirConMensaje($mensaje, $rol) {
 
 if ($_SESSION['rol'] == 1) { // Rol: Profesores
     $sql = "SELECT 
-                *
-            FROM 
-                usuarios AS u
-            INNER JOIN 
-                notas AS n ON u.idUsuarios = n.idUsuarios
-            INNER JOIN 
-                materias_profesores AS mp ON n.idMaterias = mp.idMaterias
-            WHERE 
-                u.apellido = ? 
-                AND mp.idUsuarios = ?";
+            n.idUsuarios, u.nombre, u.apellido, u.dni, 
+            n.parcial1, n.parcial2, n.final, n.idMaterias
+        FROM 
+            usuarios AS u
+        INNER JOIN 
+            notas AS n ON u.idUsuarios = n.idUsuarios
+        INNER JOIN 
+            materias_profesores AS mp ON n.idMaterias = mp.idMaterias
+        WHERE 
+            u.apellido = ? 
+            AND mp.idUsuarios = ?";
 
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("si", $apellido, $_SESSION['id_usuario']);
 
 } else if ($_SESSION['rol'] == 2) { // Rol: Preceptores
     $sql = "SELECT 
-                u.idUsuarios, 
-                u.nombre, 
-                u.apellido, 
-                n.idMaterias, 
-                n.parcial1, 
-                n.parcial2, 
-                n.final
+               *
             FROM 
                 usuarios AS u
             INNER JOIN 
@@ -110,11 +105,13 @@ while ($registro = $result->fetch_assoc()) {
                 <tbody>
                     <?php foreach ($alumnos as $alumno): ?>
                     <tr>
+                        
                         <td><?= htmlspecialchars($alumno['nombre']) ?></td>
                         <td><?= htmlspecialchars($alumno['apellido']) ?></td>
                         <td><?= htmlspecialchars($alumno['dni']) ?></td>
                         <td>
                             <?php
+                            
                             $matnom = "SELECT nombreMaterias FROM materias WHERE idMaterias = ?";
                             $stmtMat = $conn->prepare($matnom);
                             $stmtMat->bind_param("i", $alumno['idMaterias']);
@@ -128,8 +125,14 @@ while ($registro = $result->fetch_assoc()) {
                         <td><?= $alumno['final'] !== null ? htmlspecialchars($alumno['final']) : "No disponible" ?></td>
                         <?php if ($_SESSION['rol'] == 1): ?>
                             <td>
-                                <input type="radio" name="idAlumno" value="<?= htmlspecialchars($alumno['idUsuarios']) ?>" required>
-                                <input type="hidden" name="idMateria" value="<?= htmlspecialchars($alumno['idMaterias']) ?>">
+                            <input type="radio" name="idAlumno" value="<?= htmlspecialchars($alumno['idUsuarios']) ?>" required>
+                            <input type="hidden" name="idMateria" value="<?= htmlspecialchars($alumno['idMaterias']) ?>">
+                            <input type="hidden" name="nombre" value="<?= htmlspecialchars($alumno['nombre']) ?>">
+                            <input type="hidden" name="dni" value="<?= htmlspecialchars($alumno['dni']) ?>">
+                            <input type="hidden" name="apellido" value="<?= htmlspecialchars($alumno['apellido']) ?>">
+                            <input type="hidden" name="parcial1" value="<?= htmlspecialchars($alumno['parcial1']) ?>">
+                            <input type="hidden" name="parcial2" value="<?= htmlspecialchars($alumno['parcial2']) ?>">
+                            <input type="hidden" name="final" value="<?= htmlspecialchars($alumno['final']) ?>">
                             </td>
                         <?php endif; ?>
                     </tr>
